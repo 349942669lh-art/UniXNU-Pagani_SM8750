@@ -97,6 +97,32 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          flag = "-Wno-unnecessary-virtual-specifier"
+          roots = [Path("."), Path("../device")]
+          suffixes = {".py", ".sh", ".c", ".cc", ".cpp", ".h", ".hpp", ".m", ".mm"}
+          changed = []
+          for root in roots:
+              if not root.exists():
+                  continue
+              for path in root.rglob("*"):
+                  if not path.is_file() or path.suffix not in suffixes or ".git" in path.parts:
+                      continue
+                  text = path.read_text(errors="ignore")
+                  if flag not in text:
+                      continue
+                  updated = text.replace("'" + flag + "', ", "")
+                  updated = updated.replace("'" + flag + "',", "")
+                  updated = updated.replace('"' + flag + '" ', "")
+                  updated = updated.replace(flag + " ", "")
+                  updated = updated.replace(" " + flag, "")
+                  updated = updated.replace(flag, "")
+                  if updated != text:
+                      path.write_text(updated)
+                      changed.append(str(path))
+          print("removed unsupported warning flag from %d files" % len(changed))
+          PY
           ./unixnu kernel -j 3 2>&1 | tee "$UNIXNU_OUTDIR/logs/actions-build.log"
           python3 "$UNIXNU_TREE/drivers/BootProgress/Test/panic-entry.py" "$UNIXNU_TREE/.cache/xnu-work" \
             --font "$UNIXNU_TREE/drivers/PaganiDarwinBoot/DarwinBootPkg/Driver"
