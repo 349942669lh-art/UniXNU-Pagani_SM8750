@@ -35,8 +35,6 @@ with tempfile.TemporaryDirectory(prefix='pagani-peripherals-') as folder:
     (Path(folder)/'PaganiTouchPower.inc').write_text(power)
     keys=adapter[adapter.index('    void setupPlusKey('):adapter.index('    int setupTouchPower(')]
     (Path(folder)/'PaganiButtons.inc').write_text(keys)
-    delivery=adapter[adapter.index('    bool flushTouch()'):adapter.index('    void releaseContacts()')]
-    (Path(folder)/'PaganiTouchDelivery.inc').write_text(delivery)
     objects=[]
     for path in (source/'S3910.c',spi/'GeniSpi.c'):
         obj=Path(folder)/(path.stem+'.o');objects.append(str(obj))
