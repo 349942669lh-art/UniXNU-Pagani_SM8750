@@ -122,6 +122,25 @@ jobs:
                       path.write_text(updated)
                       changed.append(str(path))
           print("removed unsupported warning flag from %d files" % len(changed))
+          presenter_old = "for component in ('Stage7Probe','NativeKeyStoreEvents','NativeGOPPresenter'):"
+          presenter_new = "for component in ('Stage7Probe','NativeKeyStoreEvents'):"
+          presenter_paths = []
+          for root in (Path("."), Path("../device")):
+              if not root.exists():
+                  continue
+              for script in root.rglob("build-stage7-display.py"):
+                  if ".git" in script.parts:
+                      continue
+                  script_text = script.read_text(errors="ignore")
+                  if presenter_old not in script_text:
+                      continue
+                  if "display_object('NativeGOPPresenter')" not in script_text:
+                      raise SystemExit("refusing to drop the only presenter compile in %s" % script)
+                  script.write_text(script_text.replace(presenter_old, presenter_new))
+                  presenter_paths.append(str(script))
+          if not presenter_paths:
+              raise SystemExit("duplicate NativeGOPPresenter archive loop was not found")
+          print("kept one NativeGOPPresenter object in %d files" % len(presenter_paths))
           PY
           xcrun clang -target arm64-apple-ios17.0 -c ../device/package/cpu-baseline-stubs.c -o "$UNIXNU_OUTDIR/cpu-baseline-stubs.o"
           xcrun libtool -static -o "$UNIXNU_OUTDIR/libcpu-baseline-stubs.a" "$UNIXNU_OUTDIR/cpu-baseline-stubs.o"
