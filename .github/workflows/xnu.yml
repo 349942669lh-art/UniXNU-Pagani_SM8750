@@ -123,6 +123,9 @@ jobs:
                       changed.append(str(path))
           print("removed unsupported warning flag from %d files" % len(changed))
           PY
+          xcrun clang -target arm64-apple-ios17.0 -c ../device/package/cpu-baseline-stubs.c -o "$UNIXNU_OUTDIR/cpu-baseline-stubs.o"
+          xcrun libtool -static -o "$UNIXNU_OUTDIR/libcpu-baseline-stubs.a" "$UNIXNU_OUTDIR/cpu-baseline-stubs.o"
+          export XNU_EXTRA_LD_ARCHIVES="-Wl,-force_load,$UNIXNU_OUTDIR/libcpu-baseline-stubs.a"
           ./unixnu kernel -j 3 2>&1 | tee "$UNIXNU_OUTDIR/logs/actions-build.log"
           python3 "$UNIXNU_TREE/drivers/BootProgress/Test/panic-entry.py" "$UNIXNU_TREE/.cache/xnu-work" \
             --font "$UNIXNU_TREE/drivers/PaganiDarwinBoot/DarwinBootPkg/Driver"
