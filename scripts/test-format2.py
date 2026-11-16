@@ -94,7 +94,7 @@ with tempfile.TemporaryDirectory() as directory:
     assert 'sheng-smp=1' in ctx.board['payload']['kernel_args']
     assert 'pagani-peripheral-status=1' not in ctx.board['payload']['kernel_args']
     chosen = actual['/device-tree/chosen']
-    assert len(chosen['random-seed']) == 64
+    assert len(chosen['random-seed']) == 256
     assert struct.unpack('<Q', chosen['dram-base']) == (0x980000000,)
     assert struct.unpack('<Q', chosen['dram-size']) == (0x180000000,)
     assert struct.unpack('<Q', chosen['darwinboot-memory-size']) == (0x100000000,)
