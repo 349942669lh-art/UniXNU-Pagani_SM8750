@@ -83,7 +83,7 @@ int main(void) {
 
     def test_ram_object_follows_the_selected_archive_directory(self):
         script = (ROOT / 'scripts/build-xnu-4k-baseline.sh').read_text()
-        section = script.split('  if [ "$NATIVE_RAM_BLOCK" = 1 ]; then', 1)[1].split('  if [ "${XNU_SOURCE_PTHREAD:-0}" = 1 ]; then', 1)[0]
+        section = script.split('  if [ "$NATIVE_RAM_BLOCK" = 1 ] && [ "${XNU_SOURCE_STORAGE:-0}" != 1 ]; then', 1)[1].split('  if [ "${XNU_SOURCE_PTHREAD:-0}" = 1 ]; then', 1)[0]
         archives = []
         for component in ('NativeVirtioBlock', 'NativeRamBlock'):
             directory = Path(self.temp.name) / component
@@ -146,7 +146,7 @@ int main(void) {
         self.addCleanup(self.temp.cleanup)
         root = Path(self.temp.name)
         self.ctx = SimpleNamespace(tree=root / 'tree', work=root, board={'kernel': {'source_only': True}})
-        self.source = root / 'tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf'
+        self.source = root / 'tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped'
         self.source.parent.mkdir(parents=True)
         self.image = struct.pack('<8I', 0xfeedfacf, 0x100000c, 0, 2, 0, 0, 0, 0)
         self.source.write_bytes(self.image)
